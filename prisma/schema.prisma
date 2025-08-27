@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas   = ["cafepos"]
+}
+
+model User {
+  id                  String                @id @default(uuid())
+  username            String?               @unique
+  name                String
+  password            String
+  image               String?
+  hide                Int                   @default(0)
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  role                String
+  email               String?               @unique
+  accounts            Account[]
+  sessions            Session[]
+  cafepos_transaction cafepos_transaction[]
+
+  @@schema("cafepos")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@schema("cafepos")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  access_token      String?
+  refresh_token     String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+  @@schema("cafepos")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@schema("cafepos")
+}
+
+model cafepos_menu_items {
+  id                    String                           @id @default(uuid())
+  name                  String
+  image                 String?
+  price                 Decimal
+  created_at            DateTime                         @default(now())
+  updated_at            DateTime                         @updatedAt
+  category              String
+  addons                cafepos_menu_addons[]
+  variety               cafepos_menu_variety[]
+  transaction_menu_item cafepos_transaction_menu_items[]
+
+  @@schema("cafepos")
+}
+
+model cafepos_menu_addons {
+  id                 String             @id @default(uuid())
+  menu_items_id      String
+  name               String
+  level              String
+  price              Decimal
+  created_at         DateTime           @default(now())
+  updated_at         DateTime           @updatedAt
+  cafepos_menu_items cafepos_menu_items @relation(fields: [menu_items_id], references: [id], onDelete: Cascade)
+
+  @@schema("cafepos")
+}
+
+model cafepos_menu_variety {
+  id                 String             @id @default(uuid())
+  menu_items_id      String
+  name               String
+  price              Decimal
+  created_at         DateTime           @default(now())
+  updated_at         DateTime           @updatedAt
+  cafepos_menu_items cafepos_menu_items @relation(fields: [menu_items_id], references: [id], onDelete: Cascade)
+
+  @@schema("cafepos")
+}
+
+model cafepos_transaction {
+  id                     String                           @id @default(uuid())
+  table                  Int
+  transaction_type       String
+  user_id                String?
+  nominal                Decimal
+  service_charge         Decimal
+  tax                    Decimal
+  status                 cafepos_transaction_status
+  created_at             DateTime                         @default(now())
+  updated_at             DateTime                         @updatedAt
+  user                   User?                             @relation(fields: [user_id], references: [id])
+  transaction_menu_items cafepos_transaction_menu_items[]
+
+  @@schema("cafepos")
+}
+
+model cafepos_transaction_menu_items {
+  id             String                      @id @default(uuid())
+  menu_item_id   String
+  transaction_id String
+  name           String
+  variety        cafepos_transaction_variety[]
+  price          Decimal
+  qty             Decimal
+  created_at     DateTime                    @default(now())
+  updated_at     DateTime                    @updatedAt
+  addon          cafepos_transaction_addon[]
+  menu_items     cafepos_menu_items          @relation(fields: [menu_item_id], references: [id])
+  transaction    cafepos_transaction         @relation(fields: [transaction_id], references: [id])
+
+  @@schema("cafepos")
+}
+
+model cafepos_transaction_addon {
+  id                     String                         @id @default(uuid())
+  transaction_menu_id    String
+  name                   String
+  level                  String
+  price                  Decimal
+  created_at             DateTime                       @default(now())
+  updated_at             DateTime                       @updatedAt
+  transaction_menu_items cafepos_transaction_menu_items @relation(fields: [transaction_menu_id], references: [id])
+
+  @@schema("cafepos")
+}
+
+model cafepos_transaction_variety {
+  id                     String                         @id @default(uuid())
+  transaction_menu_id    String
+  name                   String
+  price                  Decimal
+  created_at             DateTime                       @default(now())
+  updated_at             DateTime                       @updatedAt
+  transaction_menu_items cafepos_transaction_menu_items @relation(fields: [transaction_menu_id], references: [id])
+
+  @@schema("cafepos")
+}
+
+enum cafepos_transaction_status {
+  cancel
+  done
+  unpaid
+  paid
+  process
+  ready
+
+  @@schema("cafepos")
+}
