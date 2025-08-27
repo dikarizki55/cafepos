@@ -14,37 +14,7 @@ export default function Content() {
   const { dataMenu } = useFilter();
   const { selectedMenu, setSelectedMenu } = useSelected();
 
-  // add tempdata for dev
-  // useEffect(() => {
-  //   if (dataMenu.length > 0) {
-  //     setSelectedMenu([
-  //       { ...dataMenu[0], qty: 3 },
-  //       {
-  //         ...dataMenu[1],
-  //         qty: 2,
-  //         addons: [
-  //           ...dataMenu[1].addons.filter((a) => a.level === ""),
-  //           ...dataMenu[1].addons.filter((a) => a.level !== ""),
-  //         ].map((e) => ({ ...e, level: levelParser(e.level)[4] })),
-  //       },
-  //     ]);
-  //   }
-  // }, [dataMenu, setSelectedMenu]);
-
   const [addedMenu, setAddedMenu] = useState(false);
-
-  function levelParser(level: string): string[] {
-    if (level.includes(",") && level.includes("-")) return [];
-    if (level.split("-").length === 2) {
-      const [start, end] = level.split("-").map(Number);
-      return Array.from({ length: end - start + 1 }, (_, i) => start + i).map(
-        String
-      );
-    }
-
-    if (level.includes(",")) return level.split(",");
-    return [];
-  }
 
   useEffect(() => {
     if (addedMenu) {
