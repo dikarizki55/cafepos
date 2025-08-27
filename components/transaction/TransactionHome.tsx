@@ -142,6 +142,7 @@ export default function TransactionHome({
                       src={item.image}
                       fill
                       className=" object-cover"
+                      crossOrigin="anonymous"
                     />
                   )}
                 </div>
