@@ -20,12 +20,12 @@ export default function OrderLine() {
 
   return (
     <div
-      className={`relative w-full h-full px-9 py-6 bg-white rounded-[35px] flex flex-col justify-start items-start gap-3.5 overflow-scroll`}
+      className={`relative w-full h-full px-9 py-6 bg-white rounded-[35px] flex flex-col justify-start items-start gap-3.5 overflow-auto  `}
     >
       {!newOrder && (
         <>
           <div className="self-stretch py-2.5 gap-5 flex justify-between items-center">
-            <div className=" overflow-x-scroll flex justify-start items-center gap-2">
+            <div className=" overflow-x-auto flex justify-start items-center gap-2">
               {filterDefine.map((item) => (
                 <div
                   key={item}
@@ -54,7 +54,7 @@ export default function OrderLine() {
             </>
           )}
 
-          {filter !== "default" && <Line status={filter} />}
+          {filter !== "default" && <Line status={filter} wrap />}
         </>
       )}
 

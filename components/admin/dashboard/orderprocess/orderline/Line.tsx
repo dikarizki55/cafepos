@@ -64,9 +64,11 @@ const lineDefine = {
 export function Line({
   className,
   status,
+  wrap = false,
 }: {
   className?: string;
   status: keyof typeof lineDefine;
+  wrap?: boolean;
 }) {
   const { refresh } = useLine();
   const [transaction, setTransaction] = useState<OrderCardType[]>();
@@ -90,7 +92,11 @@ export function Line({
         {lineDefine[status].name}
       </div>
       {/* <pre>{JSON.stringify(transaction, null, 2)}</pre> */}
-      <div className="self-stretch overflow-scroll inline-flex justify-start items-center gap-5">
+      <div
+        className={`self-stretch overflow-x-auto ${
+          wrap ? " flex-wrap" : ""
+        } flex justify-start items-center gap-5`}
+      >
         {transaction &&
           transaction.map((item, i) => (
             <OrderCard key={i} status={status} data={item} />

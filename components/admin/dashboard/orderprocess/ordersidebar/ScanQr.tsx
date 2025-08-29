@@ -1,23 +1,63 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IconQR } from "../../Icon";
 import { useNewOrder } from "../orderline/NewOrder";
+import jsQR from "jsqr";
 
 export default function ScanQr() {
   const { setScanQR } = useNewOrder();
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [result, setResult] = useState<string | null>(null);
 
   useEffect(() => {
+    let animationFrame: number;
+
     async function initCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false,
+          video: { facingMode: "environment" },
         });
-      } catch {}
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (error) {
+        console.error("cant access camera", error);
+      }
     }
+
+    function tick() {
+      if (
+        videoRef.current &&
+        canvasRef.current &&
+        videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA
+      ) {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        canvas.width = videoRef.current.videoWidth;
+        canvas.height = videoRef.current.videoHeight;
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+        if (code) {
+          setResult(code.data);
+          console.log("QR Code ditemukan:", code.data);
+        }
+      }
+      animationFrame = requestAnimationFrame(tick);
+    }
+
+    initCamera();
+    tick();
+
+    return () => cancelAnimationFrame(animationFrame);
   }, []);
 
   return (
@@ -33,7 +73,9 @@ export default function ScanQr() {
           playsInline
           className="rounded-lg shadow"
         />
+        <canvas ref={canvasRef} className="hidden" />
       </div>
+      {result && <p className="mt-4 text-green-600">QR Code: {result}</p>}
       <div className="self-stretch h-11 py-2.5 bg-primary rounded-3xl inline-flex justify-center items-center gap-4 cursor-pointer">
         <div className="flex  items-center gap-2.5">
           <div className="   font-bold ">Take QR</div>

@@ -140,7 +140,7 @@ export default function OrderCard({
 
   return (
     <div
-      className="flex-none w-64 px-3 py-3.5 bg-white rounded-2xl shadow-[4px_4px_20px_0px_rgba(0,0,0,0.05)] outline-1 outline-offset-[-1px] inline-flex flex-col justify-start items-start gap-3"
+      className="flex-none w-64 px-3 py-3.5 bg-white rounded-2xl shadow-[4px_4px_20px_0px_rgba(0,0,0,0.05)] inline-flex flex-col justify-start items-start gap-3"
       {...rest}
     >
       <div className="self-stretch inline-flex justify-between items-center">

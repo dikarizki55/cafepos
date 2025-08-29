@@ -40,7 +40,7 @@ export default function MenuTable() {
   }, []);
 
   return (
-    <div className=" p-5 w-full bg-white shadow-[4px_4px_20px_0px_rgba(0,0,0,0.05)] rounded-2xl border overflow-x-scroll">
+    <div className=" p-5 w-full bg-white shadow-[4px_4px_20px_0px_rgba(0,0,0,0.05)] rounded-2xl border overflow-auto">
       <table className=" border-collapse w-full">
         <thead>
           <tr>
