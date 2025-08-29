@@ -9,7 +9,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { dataMenuType } from "./Filter";
+import { dataMenuType, useFilter } from "./Filter";
 import { createPortal } from "react-dom";
 import Drawer from "../Drawer";
 import Image from "next/image";
@@ -68,8 +68,8 @@ export function useSelected() {
 
 export const handleSelectedMenu = (
   menu: SelectedMenuType,
-  selectedMenu: SerializedSelectedMenuType,
-  setSelectedMenu: Dispatch<SetStateAction<SerializedSelectedMenuType>>
+  selectedMenu: SelectedContextType["selectedMenu"],
+  setSelectedMenu: SelectedContextType["setSelectedMenu"]
 ) => {
   const isDataActive = selectedMenu.some((item) => item.id === menu.id);
   if (isDataActive) {
@@ -82,12 +82,74 @@ export const handleSelectedMenu = (
 
 export function addSelectedMenu(
   menu: SelectedMenuType,
-  setSelectedMenu: Dispatch<SetStateAction<SerializedSelectedMenuType>>
+  setSelectedMenu: SelectedContextType["setSelectedMenu"]
 ) {
   setSelectedMenu((prev) => [...prev, menu]);
 }
 
-const paymentMethod = [
+export function changeQty(
+  value: number,
+  index: number,
+  selectedMenu: SelectedContextType["selectedMenu"],
+  setSelectedMenu: SelectedContextType["setSelectedMenu"]
+) {
+  const currentQty = selectedMenu[index].qty;
+  const nextQty = currentQty + value;
+
+  if (nextQty > 0) {
+    setSelectedMenu((prev) => {
+      if (!Array.isArray(prev)) {
+        return [];
+      }
+      const newArr = [...prev];
+      newArr[index].qty = nextQty;
+      return newArr;
+    });
+  } else {
+    const filtered = selectedMenu.filter((_, i) => i !== index);
+    setSelectedMenu(filtered);
+  }
+}
+
+export function getTotal(
+  index: number,
+  selectedMenu: SelectedContextType["selectedMenu"]
+) {
+  const basePrice = Number(selectedMenu[index].price);
+  const varietyPrice = Number(selectedMenu[index].variety[0].price);
+  const addonPrice =
+    selectedMenu[index].addons.reduce(
+      (total, addon) => total + Number(addon.price),
+      0
+    ) ?? 0;
+
+  return (basePrice + varietyPrice + addonPrice) * selectedMenu[index].qty;
+}
+
+export const calculation = (
+  selectedMenu: SelectedContextType["selectedMenu"]
+) => {
+  const subtotal = selectedMenu.reduce((acc, _, index) => {
+    return acc + getTotal(index, selectedMenu);
+  }, 0);
+  const serviceCharge = subtotal * 0.05;
+  const tax = (subtotal + serviceCharge) * 0.11;
+  const total = subtotal + serviceCharge + tax;
+  return { subtotal, serviceCharge, total, tax };
+};
+
+export const handleEditSelectedMenu = (
+  data: SelectedMenuType,
+  index: number,
+  selectedMenu: SelectedContextType["selectedMenu"],
+  setSelectedMenu: SelectedContextType["setSelectedMenu"]
+) => {
+  const newArray = [...selectedMenu];
+  newArray[index] = data;
+  setSelectedMenu(newArray);
+};
+
+export const paymentMethod = [
   {
     id: "cashier",
     name: "Pay on Cashier",
@@ -108,58 +170,13 @@ const paymentMethod = [
 export default function Selected() {
   const router = useRouter();
 
+  const { rawDataMenu } = useFilter();
+
   const { selectedMenu, setSelectedMenu } = useSelected();
   const [mounted, setMounted] = useState(false);
   const [editMenu, setEditMenu] = useState<SelectedMenuType>();
   const [indexEdit, setIndexEdit] = useState(0);
   const [paymentMethodSelect, setPaymentMethodSelect] = useState(0);
-
-  function changeQty(value: number, index: number) {
-    const currentQty = selectedMenu[index].qty;
-    const nextQty = currentQty + value;
-
-    if (nextQty > 0) {
-      setSelectedMenu((prev) => {
-        if (!Array.isArray(prev)) {
-          return [];
-        }
-        const newArr = [...prev];
-        newArr[index].qty = nextQty;
-        return newArr;
-      });
-    } else {
-      const filtered = selectedMenu.filter((_, i) => i !== index);
-      setSelectedMenu(filtered);
-    }
-  }
-
-  function getTotal(index: number) {
-    const basePrice = Number(selectedMenu[index].price);
-    const varietyPrice = Number(selectedMenu[index].variety[0].price);
-    const addonPrice =
-      selectedMenu[index].addons.reduce(
-        (total, addon) => total + Number(addon.price),
-        0
-      ) ?? 0;
-
-    return (basePrice + varietyPrice + addonPrice) * selectedMenu[index].qty;
-  }
-
-  const calculation = (() => {
-    const subtotal = selectedMenu.reduce((acc, _, index) => {
-      return acc + getTotal(index);
-    }, 0);
-    const serviceCharge = subtotal * 0.05;
-    const tax = (subtotal + serviceCharge) * 0.11;
-    const total = subtotal + serviceCharge + tax;
-    return { subtotal, serviceCharge, total, tax };
-  })();
-
-  const handleEditSelectedMenu = (data: SelectedMenuType, index: number) => {
-    const newArray = [...selectedMenu];
-    newArray[index] = data;
-    setSelectedMenu(newArray);
-  };
 
   const handlePurchase = async () => {
     try {
@@ -265,7 +282,12 @@ export default function Selected() {
                               <IconMinFill
                                 className=" w-3.5"
                                 onClick={() => {
-                                  changeQty(-1, index);
+                                  changeQty(
+                                    -1,
+                                    index,
+                                    selectedMenu,
+                                    setSelectedMenu
+                                  );
                                 }}
                               />
                               <div className="w-3 text-center justify-start text-black text-lg font-medium ">
@@ -274,12 +296,17 @@ export default function Selected() {
                               <IconAddFill
                                 className=" w-3.5"
                                 onClick={() => {
-                                  changeQty(+1, index);
+                                  changeQty(
+                                    +1,
+                                    index,
+                                    selectedMenu,
+                                    setSelectedMenu
+                                  );
                                 }}
                               />
                             </div>
                             <div className="justify-start text-black text-base font-medium ">
-                              {formatRupiah(getTotal(index))}
+                              {formatRupiah(getTotal(index, selectedMenu))}
                             </div>
                           </div>
                         </div>
@@ -290,7 +317,7 @@ export default function Selected() {
                             Subtotal
                           </div>
                           <div className="justify-start text-zinc-500 text-base font-normal ">
-                            {formatRupiah(calculation.subtotal)}
+                            {formatRupiah(calculation(selectedMenu).subtotal)}
                           </div>
                         </div>
                         <div className="self-stretch inline-flex justify-between items-center">
@@ -298,7 +325,9 @@ export default function Selected() {
                             Service Charge
                           </div>
                           <div className="justify-start text-zinc-500 text-base font-normal ">
-                            {formatRupiah(calculation.serviceCharge)}
+                            {formatRupiah(
+                              calculation(selectedMenu).serviceCharge
+                            )}
                           </div>
                         </div>
                         <div className="self-stretch inline-flex justify-between items-center">
@@ -306,7 +335,7 @@ export default function Selected() {
                             Tax
                           </div>
                           <div className="justify-start text-zinc-500 text-base font-normal ">
-                            {formatRupiah(calculation.tax)}
+                            {formatRupiah(calculation(selectedMenu).tax)}
                           </div>
                         </div>
                         <div className="self-stretch inline-flex justify-between items-center">
@@ -314,7 +343,7 @@ export default function Selected() {
                             Total
                           </div>
                           <div className="justify-start text-black text-base font-bold ">
-                            {formatRupiah(calculation.total)}
+                            {formatRupiah(calculation(selectedMenu).total)}
                           </div>
                         </div>
                       </div>
@@ -359,7 +388,7 @@ export default function Selected() {
                           </div>
                         </div>
                         <div className="justify-start text-black text-xl font-medium ">
-                          {formatRupiah(calculation.total)}
+                          {formatRupiah(calculation(selectedMenu).total)}
                         </div>
                       </motion.div>
                     </motion.div>
@@ -375,8 +404,14 @@ export default function Selected() {
                       <EditMenu
                         item={editMenu}
                         edit={true}
+                        rawDataMenu={rawDataMenu}
                         action={(tempselect) => {
-                          handleEditSelectedMenu(tempselect, indexEdit);
+                          handleEditSelectedMenu(
+                            tempselect,
+                            indexEdit,
+                            selectedMenu,
+                            setSelectedMenu
+                          );
                           setEditMenu(undefined);
                         }}
                       />

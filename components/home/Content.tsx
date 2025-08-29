@@ -68,6 +68,7 @@ export default function Content() {
               >
                 <Drawer className=" absolute z-1 w-full h-full top-0 left-0">
                   <EditMenu
+                    rawDataMenu={dataMenu}
                     item={{ ...item, qty: 1 }}
                     action={(tempselected) => {
                       addSelectedMenu(tempselected, setSelectedMenu);

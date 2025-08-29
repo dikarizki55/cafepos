@@ -2,19 +2,21 @@
 import { IconSave, IconWarning } from "./Icon";
 import { QRCodeSVG } from "qrcode.react";
 import Image from "next/image";
-import { cafepos_transaction, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { formatDate, formatRupiah } from "@/lib/formatRupiah";
 import { useEffect, useRef, useState } from "react";
 import * as htmlToImage from "html-to-image";
 
 export default function TransactionHome({
   data,
-  dataWithImage,
 }: {
-  data: cafepos_transaction;
-  dataWithImage: (Prisma.cafepos_transaction_menu_itemsGetPayload<{
-    include: { addon: true; variety: true };
-  }> & { image: string })[];
+  data: Prisma.cafepos_transactionGetPayload<{
+    include: {
+      transaction_menu_items: {
+        include: { addon: true; variety: true; menu_items: true };
+      };
+    };
+  }>;
 }) {
   const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -23,6 +25,8 @@ export default function TransactionHome({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const dataWithImage = data.transaction_menu_items;
 
   const handleDownload = async () => {
     if (!ref.current) return;
@@ -121,6 +125,14 @@ export default function TransactionHome({
           </div>
           <div className="self-stretch inline-flex justify-between items-center">
             <div className="justify-start text-black text-base font-normal font-['Inter']">
+              Status
+            </div>
+            <div className="justify-start text-black text-base font-normal font-['Inter']">
+              {data.status}
+            </div>
+          </div>
+          <div className="self-stretch inline-flex justify-between items-center">
+            <div className="justify-start text-black text-base font-normal font-['Inter']">
               Nominal
             </div>
             <div className="justify-start text-black text-base font-normal font-['Inter']">
@@ -136,10 +148,10 @@ export default function TransactionHome({
             >
               <div className="self-stretch flex justify-start items-center gap-2.5">
                 <div className="w-14 h-14 relative rounded-lg overflow-hidden">
-                  {item.image && (
+                  {item.menu_items.image && (
                     <Image
                       alt={item.name}
-                      src={item.image}
+                      src={item.menu_items.image}
                       fill
                       className=" object-cover"
                       crossOrigin="anonymous"

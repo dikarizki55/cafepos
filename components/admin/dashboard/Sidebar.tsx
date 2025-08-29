@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IconFood, IconList, IconLogout, IconSettings } from "./Icon";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -8,21 +8,46 @@ import { usePathname } from "next/navigation";
 
 export default function Sidebar() {
   const [isCollapse, setIsCollapse] = useState(true);
+  const [isTouch, setIsTouch] = useState(false);
 
   const pathname = usePathname();
   const pageName = pathname.split("/")[3];
+
+  useEffect(() => {
+    const checkInput = () => {
+      if (window.matchMedia("(pointer: coarse)").matches) {
+        setIsTouch(true);
+      } else {
+        setIsTouch(false);
+      }
+    };
+
+    checkInput();
+    window.addEventListener("resize", checkInput);
+    return () => window.removeEventListener("resize", checkInput);
+  }, []);
 
   return (
     <div
       className={`${
         isCollapse ? "w-[70px]" : "w-52"
       } flex-none h-screen px-4 py-8 bg-white rounded-tr-[35px] rounded-br-[35px] inline-flex flex-col justify-between items-center overflow-hidden transition-all duration-500`}
-      onMouseEnter={() => {
-        setIsCollapse(false);
-      }}
-      onMouseLeave={() => setIsCollapse(true)}
+      {...(!isTouch && {
+        onMouseEnter: () => setIsCollapse(false),
+        onMouseLeave: () => setIsCollapse(true),
+      })}
     >
       <div className="self-stretch flex flex-col justify-start items-center gap-10">
+        {isTouch && (
+          <div
+            className=" bg-disable rounded-full w-10 h-10 flex items-center justify-center"
+            onClick={() => {
+              if (isTouch) setIsCollapse(!isCollapse);
+            }}
+          >
+            {isCollapse ? ">" : "<"}
+          </div>
+        )}
         <div
           className={`${
             isCollapse ? "-ml-1.5" : "ml-0"

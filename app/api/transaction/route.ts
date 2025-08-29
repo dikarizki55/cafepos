@@ -68,7 +68,6 @@ export async function POST(req: NextRequest) {
             if (!variety) return undefined;
             return {
               name: variety.name,
-              id: variety.id,
               created_at: variety.created_at,
               updated_at: variety.updated_at,
               price: variety.price,

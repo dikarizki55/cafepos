@@ -6,19 +6,33 @@ import { formatRupiah, formatRupiahK } from "@/lib/formatRupiah";
 import { IconAdd, IconAddFill, IconCart, IconMinFill } from "../Icon";
 import { useEffect, useState } from "react";
 import { DrawerClose } from "../Drawer";
-import { dataMenuType, useFilter } from "./Filter";
+import { dataMenuType, serializedData } from "./Filter";
+
+export function levelParser(level: string): string[] {
+  if (level.includes(",") && level.includes("-")) return [];
+  if (level.split("-").length === 2) {
+    const [start, end] = level.split("-").map(Number);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i).map(
+      String
+    );
+  }
+
+  if (level.includes(",")) return level.split(",");
+  return [];
+}
 
 export default function EditMenu({
   item,
   edit = false,
   action,
+  rawDataMenu,
 }: {
   item: SelectedMenuType;
   edit?: boolean;
   action: (value: SelectedMenuType) => void;
+  rawDataMenu: serializedData;
 }) {
   const [tempSelectMenu, setTempSelectMenu] = useState<SelectedMenuType>();
-  const { rawDataMenu } = useFilter();
   const [itemRawData, setItemRawData] = useState<dataMenuType>();
 
   useEffect(() => {
@@ -48,19 +62,6 @@ export default function EditMenu({
       setTempSelectMenu(item);
     }
   }, [item, edit, rawDataMenu]);
-
-  function levelParser(level: string): string[] {
-    if (level.includes(",") && level.includes("-")) return [];
-    if (level.split("-").length === 2) {
-      const [start, end] = level.split("-").map(Number);
-      return Array.from({ length: end - start + 1 }, (_, i) => start + i).map(
-        String
-      );
-    }
-
-    if (level.includes(",")) return level.split(",");
-    return [];
-  }
 
   function getLevel(addonsId: string) {
     return tempSelectMenu?.addons.find((af) => af.id === addonsId)?.level ?? "";
