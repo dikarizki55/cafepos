@@ -10,7 +10,7 @@ import {
   IconMinFill,
 } from "@/components/home/Icon";
 import Image from "next/image";
-import { IconEdit } from "../../Icon";
+import { IconEdit, IconQR } from "../../Icon";
 import { formatRupiah } from "@/lib/formatRupiah";
 import {
   calculation,
@@ -22,13 +22,26 @@ import {
 } from "@/components/home/content/Selected";
 import CircleSelect from "@/components/home/content/selected/CircleSelect";
 import EditMenu from "@/components/home/content/EditMenu";
+import { useSession } from "next-auth/react";
 
 export default function NewOrderSideBar() {
   const [open, setOpen] = useState(false);
+
+  const { data: session } = useSession();
+
+  const [table, setTable] = useState("");
+
   const [editMenu, setEditMenu] = useState<SelectedMenuType>();
   const [indexEdit, setIndexEdit] = useState(0);
-  const { newOrder, setNewOrder, selectedMenu, setSelectedMenu, dataMenu } =
-    useNewOrder();
+  const {
+    newOrder,
+    setNewOrder,
+    selectedMenu,
+    setSelectedMenu,
+    dataMenu,
+    purchase,
+    setPurchase,
+  } = useNewOrder();
 
   const [paymentMethodSelect, setPaymentMethodSelect] = useState(0);
 
@@ -41,6 +54,7 @@ export default function NewOrderSideBar() {
       return () => clearTimeout(handler);
     }
   }, [newOrder]);
+
   useEffect(() => {
     if (!open) {
       const handler = setTimeout(() => {
@@ -52,7 +66,26 @@ export default function NewOrderSideBar() {
     }
   }, [open, setNewOrder, setSelectedMenu]);
 
-  function handlePurchase() {}
+  const handlePurchase = async () => {
+    try {
+      const res = await fetch("/api/transaction", {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        body: JSON.stringify({
+          table,
+          menuOrder: selectedMenu,
+          paymentMethod: paymentMethod[paymentMethodSelect].id,
+          userId: session?.user?.id,
+        }),
+      }).then((res) => res.json());
+
+      if (!res.data) throw new Error("Error");
+
+      setPurchase(res.data);
+    } catch {
+      console.log("error");
+    }
+  };
 
   return (
     <>
@@ -62,8 +95,8 @@ export default function NewOrderSideBar() {
             open ? "w-116 opacity-100 h-fit" : "w-0 opacity-0 h-0"
           }  p-5 transition-all duration-300 overflow-y-scroll`}
         >
-          <div onClick={() => setOpen(false)}></div>
-          {!editMenu && (
+          {/* <div onClick={() => setOpen(false)}>close</div> */}
+          {!editMenu && purchase === "" && (
             <motion.div
               initial={{ y: 1000, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -76,6 +109,17 @@ export default function NewOrderSideBar() {
                 <div className="justify-start text-black text-2xl font-bold ">
                   Cart
                 </div>
+              </div>
+              <div className=" flex gap-5 w-full items-center">
+                <h3 className=" text-xl font-bold">Table</h3>
+
+                <input
+                  type="number"
+                  required
+                  value={table}
+                  onChange={(e) => setTable(e.target.value)}
+                  className={`border-black w-40 px-5 py-3 rounded-full border text-xl font-bold`}
+                />
               </div>
               {selectedMenu.map((item, index) => (
                 <div
@@ -142,7 +186,7 @@ export default function NewOrderSideBar() {
                   </div>
                 </div>
               ))}
-              <div className="w-80 flex flex-col justify-start items-start gap-2">
+              <div className="w-full flex flex-col justify-start items-start gap-2">
                 <div className="self-stretch inline-flex justify-between items-center">
                   <div className="justify-start text-zinc-500 text-base font-normal ">
                     Subtotal
@@ -187,7 +231,7 @@ export default function NewOrderSideBar() {
                       whileTap={{ scale: 0.9 }}
                       key={pm.id}
                       onClick={() => setPaymentMethodSelect(index)}
-                      className="self-stretch px-5 py-3 rounded-3xl border border-black flex justify-between items-center bg-white"
+                      className="self-stretch px-5 py-3 rounded-3xl border border-black flex justify-between items-center bg-white cursor-pointer"
                     >
                       <div className="flex justify-start items-center gap-2.5">
                         {pm.icon}
@@ -207,7 +251,7 @@ export default function NewOrderSideBar() {
               </div>
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
                 <motion.div
-                  className="self-stretch px-5 py-2.5 bg-primary rounded-3xl inline-flex justify-between items-center"
+                  className="self-stretch px-5 py-2.5 bg-primary rounded-3xl inline-flex justify-between items-center cursor-pointer"
                   whileTap={{ scale: 0.9 }}
                   onClick={handlePurchase}
                 >
@@ -220,6 +264,13 @@ export default function NewOrderSideBar() {
                   <div className="justify-start text-black text-xl font-medium ">
                     {formatRupiah(calculation(selectedMenu).total)}
                   </div>
+                </motion.div>
+                <motion.div
+                  className="self-stretch px-5 py-2.5 border border-black rounded-3xl inline-flex justify-center items-center cursor-pointer"
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <IconQR className=" w-6" />
+                  Scan QR
                 </motion.div>
                 <motion.div
                   className="self-stretch px-5 py-2.5 border border-red-400 text-red-400 rounded-3xl inline-flex justify-center items-center cursor-pointer"

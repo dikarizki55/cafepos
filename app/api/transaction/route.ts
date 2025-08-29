@@ -6,14 +6,20 @@ export async function POST(req: NextRequest) {
   const {
     menuOrder,
     paymentMethod,
+    userId,
+    table: tableBody,
   }: {
     menuOrder: SerializedSelectedMenuType;
     paymentMethod: string;
+    userId: string;
+    table: string;
   } = await req.json();
   const referer = req.headers.get("referer");
   if (!referer) return;
   const parsedUrl = new URL(referer);
-  const table = Number(parsedUrl.searchParams.get("table") ?? 1);
+  const tableUrl = Number(parsedUrl.searchParams.get("table"));
+
+  const table = tableUrl > 0 ? tableUrl : Number(tableBody);
 
   const filtered = menuOrder.map((item) => ({
     id: item.id,
@@ -89,15 +95,16 @@ export async function POST(req: NextRequest) {
           item.qty
       );
     }, 0);
-    const serviceCharge = subtotal * 0.05;
-    const tax = (subtotal + serviceCharge) * 0.11;
-    const total = subtotal + serviceCharge + tax;
+    const serviceCharge = Math.ceil(subtotal * 0.05);
+    const tax = Math.ceil((subtotal + serviceCharge) * 0.11);
+    const total = Math.ceil(subtotal + serviceCharge + tax);
     return { serviceCharge, total, tax };
   })();
 
   const create = await prisma.cafepos_transaction.create({
     data: {
       table,
+      ...(userId !== "" ? { user_id: userId } : {}),
       transaction_type: paymentMethod,
       nominal: calculation.total,
       service_charge: calculation.serviceCharge,

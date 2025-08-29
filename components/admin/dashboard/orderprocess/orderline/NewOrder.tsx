@@ -14,6 +14,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 type NewOrderContextType = {
   newOrder: boolean;
   setNewOrder: React.Dispatch<React.SetStateAction<boolean>>;
+  purchase: string;
+  setPurchase: React.Dispatch<React.SetStateAction<string>>;
   dataMenu: dataMenuType[];
   setDataMenu: React.Dispatch<React.SetStateAction<dataMenuType[]>>;
   selectedMenu: SelectedMenuType[];
@@ -24,12 +26,15 @@ const NewOrderContext = createContext<NewOrderContextType | null>(null);
 
 export function NewOrderProvider({ children }: { children: React.ReactNode }) {
   const [newOrder, setNewOrder] = useState(false);
+  const [purchase, setPurchase] = useState("");
   const [dataMenu, setDataMenu] = useState<dataMenuType[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<SelectedMenuType[]>([]);
 
   return (
     <NewOrderContext.Provider
       value={{
+        purchase,
+        setPurchase,
         newOrder,
         setNewOrder,
         dataMenu,
@@ -50,12 +55,7 @@ export function useNewOrder() {
 }
 
 export default function NewOrder() {
-  const {
-    newOrder,
-    setNewOrder,
-    setDataMenu: setRawData,
-    setSelectedMenu,
-  } = useNewOrder();
+  const { newOrder, setDataMenu: setRawData, setSelectedMenu } = useNewOrder();
   const [data, setData] = useState<
     {
       category: string;
@@ -108,7 +108,6 @@ export default function NewOrder() {
             </div>
           </div>
           <div className="self-stretch flex-1 inline-flex justify-start items-start gap-3.5">
-            {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
             {data.map((item) => (
               <div
                 key={item.category}
@@ -172,8 +171,6 @@ export default function NewOrder() {
               </div>
             ))}
           </div>
-
-          <div onClick={() => setNewOrder(false)}>close</div>
         </div>
       )}
     </>

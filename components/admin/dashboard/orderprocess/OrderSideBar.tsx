@@ -7,15 +7,16 @@ import TransactionDetails, {
 import { useEffect, useState } from "react";
 import { useNewOrder } from "./orderline/NewOrder";
 import NewOrderSideBar from "./ordersidebar/NewOrderSideBar";
+import { Purchase } from "./ordersidebar/Purchase";
 
 export default function OrderSideBar() {
   const [wideMode, setWideMode] = useState(false);
   const [wideAnimate, setWideAnimate] = useState(false);
   const { transactionDetailsId } = useTransactionDetails();
-  const { newOrder, setNewOrder } = useNewOrder();
+  const { purchase, newOrder, setNewOrder } = useNewOrder();
 
   useEffect(() => {
-    if (transactionDetailsId !== "" || newOrder) {
+    if (transactionDetailsId !== "" || newOrder || purchase !== "") {
       const handler = setTimeout(() => {
         setWideAnimate(true);
       }, 10);
@@ -24,7 +25,7 @@ export default function OrderSideBar() {
     } else {
       setWideMode(false);
     }
-  }, [newOrder, transactionDetailsId]);
+  }, [newOrder, purchase, transactionDetailsId]);
 
   useEffect(() => {
     if (!wideMode) {
@@ -69,9 +70,13 @@ export default function OrderSideBar() {
           </div>
         </div>
       )}
-
-      <TransactionDetails />
-      <NewOrderSideBar />
+      {wideMode && (
+        <>
+          <TransactionDetails />
+          <NewOrderSideBar />
+          <Purchase />
+        </>
+      )}
       <Clock />
     </div>
   );

@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import Sidebar from "@/components/admin/dashboard/Sidebar";
+import { SessionProvider } from "next-auth/react";
 import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
@@ -12,9 +13,11 @@ export default async function DashboardLayout({
     redirect("/admin");
   }
   return (
-    <div className=" w-full h-screen flex gap-5 bg-disable">
-      <Sidebar />
-      {children}
-    </div>
+    <SessionProvider>
+      <div className=" w-full h-screen flex gap-5 bg-disable">
+        <Sidebar />
+        {children}
+      </div>
+    </SessionProvider>
   );
 }

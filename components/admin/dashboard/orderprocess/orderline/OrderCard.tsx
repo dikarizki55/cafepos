@@ -5,43 +5,9 @@ import { useLine } from "./Line";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useTransactionDetails } from "../ordersidebar/TransactionDetails";
+import { useNewOrder } from "./NewOrder";
 
 dayjs.extend(relativeTime);
-
-const statusDefine = {
-  unpaid: {
-    color: "bg-red-400",
-    action: "Payment",
-    icon: <IconCard className=" w-3.5" />,
-  },
-  paid: {
-    color: "bg-blue-500",
-    action: "Process",
-    icon: <IconClock className=" w-3.5" />,
-  },
-  process: {
-    color: "bg-primary",
-    action: "Process",
-    icon: <IconFood className=" w-3.5" />,
-  },
-  ready: {
-    color: "bg-emerald-500",
-    action: "Served",
-    icon: <IconCheckmark className=" w-3.5" />,
-  },
-  done: {
-    color: "bg-emerald-500",
-    action: "",
-    icon: <></>,
-  },
-  cancel: {
-    color: "bg-disable",
-    action: "",
-    icon: <></>,
-  },
-};
-
-// const statusArray = Object.keys(statusDefine) as (keyof typeof statusDefine)[];
 
 export type OrderCardType = {
   id: string;
@@ -57,10 +23,53 @@ export default function OrderCard({
   ...rest
 }: {
   data?: OrderCardType;
-  status: keyof typeof statusDefine;
+  status: "unpaid" | "paid" | "process" | "ready" | "done" | "cancel";
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const statusDefine = {
+    unpaid: {
+      color: "bg-red-400",
+      action: "Payment",
+      actionFunction: () => {
+        setPurchase(data.id);
+      },
+      icon: <IconCard className=" w-3.5" />,
+    },
+    paid: {
+      color: "bg-blue-500",
+      action: "Process",
+      actionFunction: () => {},
+      icon: <IconClock className=" w-3.5" />,
+    },
+    process: {
+      color: "bg-primary",
+      action: "Process",
+      actionFunction: () => {},
+      icon: <IconFood className=" w-3.5" />,
+    },
+    ready: {
+      color: "bg-emerald-500",
+      action: "Served",
+      actionFunction: () => {},
+      icon: <IconCheckmark className=" w-3.5" />,
+    },
+    done: {
+      color: "bg-emerald-500",
+      action: "",
+      actionFunction: () => {},
+      icon: <></>,
+    },
+    cancel: {
+      color: "bg-disable",
+      action: "",
+      actionFunction: () => {},
+      icon: <></>,
+    },
+  };
+
   const { refresh, setRefresh } = useLine();
   const { setTransactionDetailsId, setItems } = useTransactionDetails();
+
+  const { setPurchase } = useNewOrder();
 
   const orderCode = (() => {
     const dateData = new Date(data.created_at);
@@ -87,7 +96,14 @@ export default function OrderCard({
   const handleDetailTransaction = () => {
     setTransactionDetailsId(data.id);
     setItems(Number(data.items));
+    setPurchase("");
   };
+
+  function handleAction() {
+    statusDefine[status].actionFunction();
+    setTransactionDetailsId("");
+    setItems(0);
+  }
 
   const getTime = (time: Date) => {
     return dayjs(time).fromNow();
@@ -146,7 +162,10 @@ export default function OrderCard({
               </div>
             </div>
 
-            <div className="flex-1 px-6 py-1.5 bg-primary rounded-2xl flex justify-center items-center gap-[5px]">
+            <div
+              className="flex-1 px-6 py-1.5 bg-primary rounded-2xl flex justify-center items-center gap-[5px] cursor-pointer"
+              onClick={() => handleAction()}
+            >
               {statusDefine[status].icon}
               <div className="justify-start text-black text-xs font-normal">
                 {statusDefine[status].action}

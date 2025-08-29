@@ -132,9 +132,9 @@ export const calculation = (
   const subtotal = selectedMenu.reduce((acc, _, index) => {
     return acc + getTotal(index, selectedMenu);
   }, 0);
-  const serviceCharge = subtotal * 0.05;
-  const tax = (subtotal + serviceCharge) * 0.11;
-  const total = subtotal + serviceCharge + tax;
+  const serviceCharge = Math.ceil(subtotal * 0.05);
+  const tax = Math.ceil((subtotal + serviceCharge) * 0.11);
+  const total = Math.ceil(subtotal + serviceCharge + tax);
   return { subtotal, serviceCharge, total, tax };
 };
 

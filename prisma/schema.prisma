@@ -108,33 +108,35 @@ model cafepos_menu_variety {
 model cafepos_transaction {
   id                     String                           @id @default(uuid())
   table                  Int
-  transaction_type       String
   user_id                String?
   nominal                Decimal
   service_charge         Decimal
   tax                    Decimal
-  status                 cafepos_transaction_status
   created_at             DateTime                         @default(now())
   updated_at             DateTime                         @updatedAt
-  user                   User?                             @relation(fields: [user_id], references: [id])
+  transaction_type       String
+  status                 cafepos_transaction_status
+  cash_received          Decimal?                         @db.Decimal
+  change_amount          Decimal?                         @db.Decimal
+  user                   User?                            @relation(fields: [user_id], references: [id])
   transaction_menu_items cafepos_transaction_menu_items[]
 
   @@schema("cafepos")
 }
 
 model cafepos_transaction_menu_items {
-  id             String                      @id @default(uuid())
+  id             String                        @id @default(uuid())
   menu_item_id   String
   transaction_id String
   name           String
-  variety        cafepos_transaction_variety[]
   price          Decimal
-  qty             Decimal
-  created_at     DateTime                    @default(now())
-  updated_at     DateTime                    @updatedAt
+  created_at     DateTime                      @default(now())
+  updated_at     DateTime                      @updatedAt
+  qty            Decimal
   addon          cafepos_transaction_addon[]
-  menu_items     cafepos_menu_items          @relation(fields: [menu_item_id], references: [id])
-  transaction    cafepos_transaction         @relation(fields: [transaction_id], references: [id])
+  menu_items     cafepos_menu_items            @relation(fields: [menu_item_id], references: [id])
+  transaction    cafepos_transaction           @relation(fields: [transaction_id], references: [id])
+  variety        cafepos_transaction_variety[]
 
   @@schema("cafepos")
 }
