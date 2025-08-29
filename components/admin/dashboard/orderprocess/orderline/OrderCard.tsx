@@ -6,6 +6,17 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useTransactionDetails } from "../ordersidebar/TransactionDetails";
 import { useNewOrder } from "./NewOrder";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 dayjs.extend(relativeTime);
 
@@ -17,13 +28,21 @@ export type OrderCardType = {
   updated_at: string;
 };
 
+export type StatusType =
+  | "unpaid"
+  | "paid"
+  | "process"
+  | "ready"
+  | "done"
+  | "cancel";
+
 export default function OrderCard({
   data = { id: "", table: "", created_at: "", updated_at: "", items: "" },
   status,
   ...rest
 }: {
   data?: OrderCardType;
-  status: "unpaid" | "paid" | "process" | "ready" | "done" | "cancel";
+  status: StatusType;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const statusDefine = {
     unpaid: {
@@ -37,19 +56,25 @@ export default function OrderCard({
     paid: {
       color: "bg-blue-500",
       action: "Process",
-      actionFunction: () => {},
+      actionFunction: () => {
+        changeStatus("process");
+      },
       icon: <IconClock className=" w-3.5" />,
     },
     process: {
       color: "bg-primary",
-      action: "Process",
-      actionFunction: () => {},
+      action: "Ready",
+      actionFunction: () => {
+        changeStatus("ready");
+      },
       icon: <IconFood className=" w-3.5" />,
     },
     ready: {
       color: "bg-emerald-500",
       action: "Served",
-      actionFunction: () => {},
+      actionFunction: () => {
+        changeStatus("done");
+      },
       icon: <IconCheckmark className=" w-3.5" />,
     },
     done: {
@@ -82,15 +107,19 @@ export default function OrderCard({
     return `${year}${month}${day}-${hour}${minutes}${seconds}`;
   })();
 
-  const handleCancelOrder = async () => {
+  const changeStatus = async (status: string) => {
     await fetch(`/api/admin/orderprocess/${data.id}`, {
       headers: { "Content-Type": "application/json" },
       method: "PATCH",
       credentials: "include",
-      body: JSON.stringify({ status: "cancel" }),
+      body: JSON.stringify({ status }),
     });
 
     setRefresh(!refresh);
+  };
+
+  const handleCancelOrder = () => {
+    changeStatus("cancel");
   };
 
   const handleDetailTransaction = () => {
@@ -139,7 +168,7 @@ export default function OrderCard({
           Table {data.table}
         </div>
         <div className="justify-start text-black text-xs font-normal font-['Inter']">
-          {getTime(new Date(data.created_at))}
+          {getTime(new Date(data.updated_at))}
         </div>
       </div>
       <div className="self-stretch inline-flex justify-start items-center gap-2.5">
@@ -162,29 +191,66 @@ export default function OrderCard({
               </div>
             </div>
 
-            <div
-              className="flex-1 px-6 py-1.5 bg-primary rounded-2xl flex justify-center items-center gap-[5px] cursor-pointer"
-              onClick={() => handleAction()}
-            >
-              {statusDefine[status].icon}
-              <div className="justify-start text-black text-xs font-normal">
-                {statusDefine[status].action}
-              </div>
-            </div>
+            <AlertDialog>
+              <AlertDialogTrigger className="flex-1 px-6 py-1.5 bg-primary rounded-2xl flex justify-center items-center gap-[5px] cursor-pointer">
+                {statusDefine[status].icon}
+                <div className="justify-start text-black text-xs font-normal">
+                  {statusDefine[status].action}
+                </div>
+              </AlertDialogTrigger>
+              <AlertDialogContent className=" rounded-4xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot return to the previous step.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className=" rounded-full cursor-pointer">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleAction()}
+                    className="px-6 py-1.5 bg-primary text-black rounded-2xl font-medium flex justify-center items-center gap-[5px] cursor-pointer"
+                  >
+                    {statusDefine[status].icon}
+                    {statusDefine[status].action}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </div>
       {status === "unpaid" && (
-        <div
-          className="self-stretch inline-flex justify-start items-center gap-2.5 cursor-pointer"
-          onClick={handleCancelOrder}
-        >
-          <div className="flex-1 px-6 py-1.5 rounded-2xl outline-1 outline-offset-[-1px] outline-red-400 flex justify-center items-center gap-2.5">
-            <div className="justify-start text-red-400 text-xs font-normal">
-              Cancel Order
+        <AlertDialog>
+          <AlertDialogTrigger className="self-stretch inline-flex justify-start items-center gap-2.5 cursor-pointer">
+            <div className="flex-1 px-6 py-1.5 rounded-2xl outline-1 outline-offset-[-1px] outline-red-400 flex justify-center items-center gap-2.5">
+              <div className="justify-start text-red-400 text-xs font-normal">
+                Cancel Order
+              </div>
             </div>
-          </div>
-        </div>
+          </AlertDialogTrigger>
+          <AlertDialogContent className=" rounded-4xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot return to the previous step.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className=" rounded-full cursor-pointer">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleCancelOrder}
+                className="px-6 py-1.5 bg-red-500 hover:bg-red-600 rounded-2xl font-medium cursor-pointer"
+              >
+                Cancel Order
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   );

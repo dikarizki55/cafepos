@@ -36,7 +36,7 @@ export const DeleteMenu = ({
       <AlertDialogTrigger className=" w-12.5 h-12.5 bg-disable flex-none rounded-full flex justify-center items-center cursor-pointer">
         <IconTrash className=" text-mywarning w-5" />
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className=" rounded-4xl">
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -45,12 +45,12 @@ export const DeleteMenu = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className=" cursor-pointer">
+          <AlertDialogCancel className=" rounded-full cursor-pointer">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
-            className=" text-black cursor-pointer"
+            className=" text-black cursor-pointer rounded-full"
           >
             Continue
           </AlertDialogAction>

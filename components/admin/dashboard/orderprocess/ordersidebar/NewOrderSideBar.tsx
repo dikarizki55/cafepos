@@ -23,6 +23,7 @@ import {
 import CircleSelect from "@/components/home/content/selected/CircleSelect";
 import EditMenu from "@/components/home/content/EditMenu";
 import { useSession } from "next-auth/react";
+import ScanQr from "./ScanQr";
 
 export default function NewOrderSideBar() {
   const [open, setOpen] = useState(false);
@@ -41,6 +42,8 @@ export default function NewOrderSideBar() {
     dataMenu,
     purchase,
     setPurchase,
+    scanQr,
+    setScanQR,
   } = useNewOrder();
 
   const [paymentMethodSelect, setPaymentMethodSelect] = useState(0);
@@ -67,23 +70,25 @@ export default function NewOrderSideBar() {
   }, [open, setNewOrder, setSelectedMenu]);
 
   const handlePurchase = async () => {
-    try {
-      const res = await fetch("/api/transaction", {
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-        body: JSON.stringify({
-          table,
-          menuOrder: selectedMenu,
-          paymentMethod: paymentMethod[paymentMethodSelect].id,
-          userId: session?.user?.id,
-        }),
-      }).then((res) => res.json());
+    if (selectedMenu.length > 0) {
+      try {
+        const res = await fetch("/api/transaction", {
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          body: JSON.stringify({
+            table,
+            menuOrder: selectedMenu,
+            paymentMethod: paymentMethod[paymentMethodSelect].id,
+            userId: session?.user?.id,
+          }),
+        }).then((res) => res.json());
 
-      if (!res.data) throw new Error("Error");
+        if (!res.data) throw new Error("Error");
 
-      setPurchase(res.data);
-    } catch {
-      console.log("error");
+        setPurchase(res.data);
+      } catch {
+        console.log("error");
+      }
     }
   };
 
@@ -96,7 +101,7 @@ export default function NewOrderSideBar() {
           }  p-5 transition-all duration-300 overflow-y-scroll`}
         >
           {/* <div onClick={() => setOpen(false)}>close</div> */}
-          {!editMenu && purchase === "" && (
+          {!editMenu && purchase === "" && !scanQr && (
             <motion.div
               initial={{ y: 1000, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -266,8 +271,9 @@ export default function NewOrderSideBar() {
                   </div>
                 </motion.div>
                 <motion.div
-                  className="self-stretch px-5 py-2.5 border border-black rounded-3xl inline-flex justify-center items-center cursor-pointer"
+                  className="self-stretch px-5 py-2.5 border border-black rounded-3xl flex justify-center items-center gap-2.5 cursor-pointer"
                   whileTap={{ scale: 0.9 }}
+                  onClick={() => setScanQR(true)}
                 >
                   <IconQR className=" w-6" />
                   Scan QR
@@ -306,6 +312,7 @@ export default function NewOrderSideBar() {
               />
             </motion.div>
           )}
+          {scanQr && <ScanQr />}
         </div>
       )}
     </>

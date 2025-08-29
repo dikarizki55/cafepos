@@ -227,6 +227,32 @@ export default function TransactionDetails() {
                     </div>
                   </Skeleton>
                 </div>
+                <div className="self-stretch inline-flex justify-between items-center">
+                  <div className="justify-start text-black text-base font-normal font-['Inter']">
+                    Cash Received
+                  </div>
+                  <Skeleton
+                    className="bg-disable w-50 h-[17px] rounded-full"
+                    loading={loading}
+                  >
+                    <div className="justify-start text-black text-base font-normal font-['Inter']">
+                      {formatRupiah(Number(data?.cash_received))}
+                    </div>
+                  </Skeleton>
+                </div>
+                <div className="self-stretch inline-flex justify-between items-center">
+                  <div className="justify-start text-black text-base font-normal font-['Inter']">
+                    Cash Change
+                  </div>
+                  <Skeleton
+                    className="bg-disable w-50 h-[17px] rounded-full"
+                    loading={loading}
+                  >
+                    <div className="justify-start text-red-400 text-base font-normal font-['Inter']">
+                      -{formatRupiah(Number(data?.change_amount))}
+                    </div>
+                  </Skeleton>
+                </div>
               </div>
               <div className="self-stretch flex flex-col justify-start items-start gap-5">
                 {loading &&

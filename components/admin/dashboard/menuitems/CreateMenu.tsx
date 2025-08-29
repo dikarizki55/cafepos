@@ -174,7 +174,7 @@ export default function CreateMenu({
             Create
           </DialogTrigger>
         )}
-        <DialogContent className=" rounded-2xl overflow-scroll max-h-[calc(100vh-60px)]">
+        <DialogContent className=" rounded-4xl overflow-scroll max-h-[calc(100vh-60px)]">
           <DialogHeader>
             <DialogTitle>{initial ? "Edit Menu" : "Add Menu"}</DialogTitle>
           </DialogHeader>

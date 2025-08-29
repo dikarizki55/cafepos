@@ -14,6 +14,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 type NewOrderContextType = {
   newOrder: boolean;
   setNewOrder: React.Dispatch<React.SetStateAction<boolean>>;
+  scanQr: boolean;
+  setScanQR: React.Dispatch<React.SetStateAction<boolean>>;
   purchase: string;
   setPurchase: React.Dispatch<React.SetStateAction<string>>;
   dataMenu: dataMenuType[];
@@ -26,6 +28,7 @@ const NewOrderContext = createContext<NewOrderContextType | null>(null);
 
 export function NewOrderProvider({ children }: { children: React.ReactNode }) {
   const [newOrder, setNewOrder] = useState(false);
+  const [scanQr, setScanQR] = useState(false);
   const [purchase, setPurchase] = useState("");
   const [dataMenu, setDataMenu] = useState<dataMenuType[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<SelectedMenuType[]>([]);
@@ -41,6 +44,8 @@ export function NewOrderProvider({ children }: { children: React.ReactNode }) {
         setDataMenu,
         selectedMenu,
         setSelectedMenu,
+        scanQr,
+        setScanQR,
       }}
     >
       {children}
