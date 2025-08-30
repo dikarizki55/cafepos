@@ -99,7 +99,9 @@ export default function TransactionDetails() {
       } catch {}
     };
 
-    getData();
+    if (transactionDetailsId !== "") {
+      getData();
+    }
   }, [transactionDetailsId]);
 
   function getTotal(index: number) {

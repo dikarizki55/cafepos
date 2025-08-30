@@ -70,7 +70,7 @@ export default function NewOrderSideBar() {
   }, [open, setNewOrder, setSelectedMenu]);
 
   const handlePurchase = async () => {
-    if (selectedMenu.length > 0) {
+    if (selectedMenu.length > 0 && Number(table) > 0) {
       try {
         const res = await fetch("/api/transaction", {
           headers: { "Content-Type": "application/json" },
@@ -98,7 +98,7 @@ export default function NewOrderSideBar() {
         <div
           className={`${
             open ? "w-116 opacity-100 h-fit" : "w-0 opacity-0 h-0"
-          }  p-5 transition-all duration-300 overflow-y-scroll`}
+          }  p-3 transition-all duration-300 overflow-y-scroll`}
         >
           {/* <div onClick={() => setOpen(false)}>close</div> */}
           {!editMenu && purchase === "" && !scanQr && (
@@ -115,6 +115,11 @@ export default function NewOrderSideBar() {
                   Cart
                 </div>
               </div>
+              {Number(table) < 1 && (
+                <span className=" self-start text-red-500 font-bold">
+                  Please Input Table Number!
+                </span>
+              )}
               <div className=" flex gap-5 w-full items-center">
                 <h3 className=" text-xl font-bold">Table</h3>
 
@@ -123,7 +128,11 @@ export default function NewOrderSideBar() {
                   required
                   value={table}
                   onChange={(e) => setTable(e.target.value)}
-                  className={`border-black w-40 px-5 py-3 rounded-full border text-xl font-bold`}
+                  className={`w-40 px-5 py-3 rounded-full border text-xl font-bold ${
+                    Number(table) > 0
+                      ? "border-black "
+                      : " border-red-400 outline outline-red-400"
+                  }`}
                 />
               </div>
               {selectedMenu.map((item, index) => (
