@@ -41,7 +41,7 @@ export default function ScanQr() {
           const code = jsQR(imageData.data, imageData.width, imageData.height);
 
           if (code && code.data !== "") {
-            setResult(code.data);
+            setResult(String(code.data.split("/").pop()));
             console.log("QR Code ditemukan:", code.data);
             stopCamera();
           }

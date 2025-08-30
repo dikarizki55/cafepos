@@ -14,6 +14,7 @@ import {
 } from "react";
 import { IconCard } from "@/components/home/Icon";
 import { useNewOrder } from "../orderline/NewOrder";
+import { QRCodeSVG } from "qrcode.react";
 
 type TransactionDetailsType = {
   transactionDetailsId: string;
@@ -156,6 +157,10 @@ export default function TransactionDetails() {
           <div className="w-full px-5 flex flex-col justify-start items-center gap-7 overflow-hidden bg-white">
             <div className="self-stretch flex flex-col justify-start items-start gap-5">
               <div className=" self-stretch flex flex-col justify-start items-start gap-2">
+                <QRCodeSVG
+                  value={`${window.location.origin}/transaction/${data?.id}`}
+                  className="w-50 h-50 my-2 self-center"
+                />
                 <div className="self-stretch justify-start text-black text-base font-bold font-['Inter']">
                   Transaction Details
                 </div>

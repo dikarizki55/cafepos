@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 import { formatDate, formatRupiah } from "@/lib/formatRupiah";
 import { useEffect, useRef, useState } from "react";
 import * as htmlToImage from "html-to-image";
+import { useRouter } from "next/navigation";
 
 export default function TransactionHome({
   data,
@@ -18,13 +19,19 @@ export default function TransactionHome({
     };
   }>;
 }) {
+  const router = useRouter();
+
   const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const [hideButton, setHideButton] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    const handler = setInterval(() => {
+      router.refresh();
+    }, 15000);
+    return () => clearInterval(handler);
+  }, [router]);
 
   const dataWithImage = data.transaction_menu_items;
 
@@ -89,7 +96,10 @@ export default function TransactionHome({
         <>
           <IconSuccess className=" w-20 text-success" />
           <div className="self-stretch text-center justify-start text-black text-3xl font-bold font-['Inter']">
-            Payment Successfull
+            {data.status === "paid" && "Payment Successfull"}
+            {data.status === "process" && "Cooking Process..."}
+            {data.status === "ready" && "On the Way to Your Table..."}
+            {data.status === "done" && "Enjoy your food"}
           </div>
         </>
       ) : (
@@ -100,7 +110,10 @@ export default function TransactionHome({
           </div>
         </>
       )}
-      <QRCodeSVG value={data.id} className="w-50 h-50 my-2" />
+      <QRCodeSVG
+        value={`${window.location.origin}/transaction/${data.id}`}
+        className="w-50 h-50 my-2"
+      />
       <div className="self-stretch flex flex-col justify-start items-start gap-5">
         <div className=" self-stretch flex flex-col justify-start items-start gap-2">
           <div className="self-stretch justify-start text-black text-base font-bold font-['Inter']">
