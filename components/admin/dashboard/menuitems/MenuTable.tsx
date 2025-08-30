@@ -6,18 +6,32 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { DeleteMenu } from "./DeleteMenu";
 import CreateMenu from "./CreateMenu";
+import { ArrowUpDown } from "lucide-react";
+
+const columnType = [
+  "name",
+  "image",
+  "addons",
+  "variety",
+  "price",
+  "category",
+  "created_at",
+  "updated_at",
+] as const;
+
+type ColumnType = (typeof columnType)[number];
 
 const head = [
-  "No.",
-  "Name",
-  "Image",
-  "Addons",
-  "Variety",
-  "Price",
-  "Category",
-  "Date Created",
-  "Date Modified",
-  "Action",
+  { name: "No.", className: "" },
+  { name: "name", className: "" },
+  { name: "image", className: "" },
+  { name: "addons", className: "" },
+  { name: "variety", className: "" },
+  { name: "price", className: "text-right pr-8" },
+  { name: "category", className: "" },
+  { name: "created_at", className: "" },
+  { name: "updated_at", className: "" },
+  { name: "action", className: "text-center" },
 ];
 
 export default function MenuTable() {
@@ -25,8 +39,15 @@ export default function MenuTable() {
     | Prisma.cafepos_menu_itemsGetPayload<{
         include: { addons: true; variety: true };
       }>[]
-    | null
-  >(null);
+  >([]);
+  const [sortedData, setSortedData] = useState<
+    | Prisma.cafepos_menu_itemsGetPayload<{
+        include: { addons: true; variety: true };
+      }>[]
+  >([]);
+
+  const [columnSort, setColumnSort] = useState<ColumnType>("created_at");
+  const [asc, setAsc] = useState(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -39,6 +60,26 @@ export default function MenuTable() {
     getData();
   }, []);
 
+  // useEffect(()=>{
+  //   if(columnSort)
+  // },[])
+
+  function sortBy(column: ColumnType) {
+    if (columnSort !== column) {
+      setColumnSort(column);
+      setAsc(false);
+    } else {
+      setAsc(!asc);
+    }
+  }
+
+  useEffect(() => {
+    const sorted = [...resdata].sort((a, b) =>
+      String(a[columnSort]).localeCompare(String(b[columnSort]))
+    );
+    setSortedData(asc ? sorted : sorted.reverse());
+  }, [asc, columnSort, resdata]);
+
   return (
     <div className=" p-5 w-full bg-white shadow-[4px_4px_20px_0px_rgba(0,0,0,0.05)] rounded-2xl border overflow-auto">
       <table className=" border-collapse w-full">
@@ -47,22 +88,28 @@ export default function MenuTable() {
             {head.map((head, i) => (
               <th
                 key={i}
-                className={` p-2 ${
-                  head === "Price"
-                    ? "text-right pr-8"
-                    : head === "Action"
-                    ? "text-center"
-                    : " text-left"
-                }`}
+                className={` p-2 capitalize text-left ${head.className} cursor-pointer`}
+                onClick={() => {
+                  if ((columnType as readonly string[]).includes(head.name))
+                    sortBy(head.name as ColumnType);
+                }}
               >
-                {head}
+                <span className=" flex gap-2">
+                  {head.name}
+                  {head.name === columnSort && (
+                    <ArrowUpDown
+                      className="w-3 "
+                      style={{ opacity: asc ? "1" : "0.3" }}
+                    />
+                  )}
+                </span>
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {resdata &&
-            resdata.map((items, i) => (
+          {sortedData &&
+            sortedData.map((items, i) => (
               <tr key={i} className=" border-t">
                 <td className=" text-center w-10 px-2">{i + 1}</td>
                 <td className=" py-2">{items.name}</td>

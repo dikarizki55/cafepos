@@ -12,6 +12,8 @@ import {
   useEffect,
   useState,
 } from "react";
+import { IconCard } from "@/components/home/Icon";
+import { useNewOrder } from "../orderline/NewOrder";
 
 type TransactionDetailsType = {
   transactionDetailsId: string;
@@ -57,8 +59,13 @@ export default function TransactionDetails() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const { setPurchase } = useNewOrder();
+
   const [data, setData] = useState<Prisma.cafepos_transactionGetPayload<{
     include: {
+      user: {
+        select: { id: true; name: true };
+      };
       transaction_menu_items: {
         include: { addon: true; variety: true; menu_items: true };
       };
@@ -186,6 +193,19 @@ export default function TransactionDetails() {
                   >
                     <div className="justify-start text-black text-base font-normal font-['Inter']">
                       {getDate()}
+                    </div>
+                  </Skeleton>
+                </div>
+                <div className="self-stretch inline-flex justify-between items-center">
+                  <div className="justify-start text-black text-base font-normal font-['Inter']">
+                    Cashier Name
+                  </div>
+                  <Skeleton
+                    className="bg-disable w-50 h-[17px] rounded-full"
+                    loading={loading}
+                  >
+                    <div className="justify-start text-black text-base font-normal font-['Inter']">
+                      {data?.user?.name}
                     </div>
                   </Skeleton>
                 </div>
@@ -372,8 +392,20 @@ export default function TransactionDetails() {
                 </div>
               </div>
             </div>
+            {data?.status === "unpaid" && (
+              <div
+                className=" bg-primary rounded-full w-full text-center py-2 cursor-pointer flex justify-center items-center gap-2"
+                onClick={() => {
+                  setPurchase(data.id);
+                  setOpen(false);
+                }}
+              >
+                <IconCard className="w-5" />
+                Payment
+              </div>
+            )}
             <div
-              className=" bg-primary rounded-full w-full text-center py-2 cursor-pointer"
+              className=" border border-red-400 text-red-400 rounded-full w-full text-center font-bold py-2 cursor-pointer"
               onClick={() => setOpen(false)}
             >
               Close

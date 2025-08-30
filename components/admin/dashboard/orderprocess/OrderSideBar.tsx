@@ -8,12 +8,16 @@ import { useEffect, useState } from "react";
 import { useNewOrder } from "./orderline/NewOrder";
 import NewOrderSideBar from "./ordersidebar/NewOrderSideBar";
 import { Purchase } from "./ordersidebar/Purchase";
+import { useSession } from "next-auth/react";
+import { User } from "@prisma/client";
 
 export default function OrderSideBar() {
   const [wideMode, setWideMode] = useState(false);
   const [wideAnimate, setWideAnimate] = useState(false);
   const { transactionDetailsId } = useTransactionDetails();
   const { purchase, newOrder, setNewOrder } = useNewOrder();
+  const { data: session } = useSession();
+  const [userInfo, setUserInfo] = useState<User | null>(null);
 
   useEffect(() => {
     if (transactionDetailsId !== "" || newOrder || purchase !== "") {
@@ -36,6 +40,20 @@ export default function OrderSideBar() {
     }
   }, [wideMode]);
 
+  useEffect(() => {
+    if (session?.user?.id) {
+      async function getData() {
+        const res = await fetch("/api/admin/userinfo", {
+          credentials: "include",
+        }).then((res) => res.json());
+
+        setUserInfo(res.user);
+      }
+
+      getData();
+    }
+  }, [session?.user?.id]);
+
   return (
     <div
       className={`py-10 bg-white rounded-tl-[35px] rounded-bl-[35px] flex flex-col justify-between items-center transition-all duration-300`}
@@ -46,15 +64,15 @@ export default function OrderSideBar() {
         }  items-center gap-[5px] transition-all duration-300`}
       >
         <div className="w-12 h-12 p-2.5 bg-neutral-100 rounded-[100px] inline-flex justify-center items-center gap-2.5">
-          <div className="justify-start text-black text-lg font-medium font-['Inter']">
-            AC
+          <div className="justify-start text-black text-lg font-medium uppercase">
+            {userInfo?.name.split(" ").map((fn) => fn[0])}
           </div>
         </div>
         <div className="self-stretch flex justify-center items-center text-center text-black text-base font-medium">
-          Admin Cashier
+          {userInfo?.name}
         </div>
         <div className="self-stretch flex justify-center items-center text-center text-black text-sm font-normal font-['Inter']">
-          Cashier 01
+          {userInfo?.role}
         </div>
       </div>
       {!wideMode && (

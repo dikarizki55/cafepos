@@ -13,6 +13,9 @@ export async function GET(
     const data = await prisma.cafepos_transaction.findUnique({
       where: { id },
       include: {
+        user: {
+          select: { id: true, name: true },
+        },
         transaction_menu_items: {
           include: { addon: true, variety: true, menu_items: true },
         },

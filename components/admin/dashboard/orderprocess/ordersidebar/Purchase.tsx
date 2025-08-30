@@ -5,6 +5,7 @@ import { formatRupiah } from "@/lib/formatRupiah";
 import { useEffect, useState } from "react";
 import { useNewOrder } from "../orderline/NewOrder";
 import { useLine } from "../orderline/Line";
+import { useSession } from "next-auth/react";
 
 type PurchaseType = { id: string; nominal: number };
 
@@ -14,6 +15,7 @@ export function Purchase() {
   const [paid, setPaid] = useState(false);
   const [cash, setCash] = useState("");
   const { refresh, setRefresh } = useLine();
+  const { data: session } = useSession();
 
   const cashNum = Number(cash);
 
@@ -74,6 +76,7 @@ export function Purchase() {
           method: "PATCH",
           credentials: "include",
           body: JSON.stringify({
+            user_id: session?.user?.id,
             status: "paid",
             cash_received: cashNum,
             change_amount: cashNum - data.nominal,
