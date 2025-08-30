@@ -1,5 +1,5 @@
 "use client";
-import { IconSave, IconWarning } from "./Icon";
+import { IconSave, IconSuccess, IconWarning } from "./Icon";
 import { QRCodeSVG } from "qrcode.react";
 import Image from "next/image";
 import { Prisma } from "@prisma/client";
@@ -82,13 +82,24 @@ export default function TransactionHome({
 
   return (
     <div
-      className="w-full px-10 py-15 flex flex-col justify-start items-center gap-7 overflow-hidden bg-white"
+      className=" w-100 px-10 py-15 flex flex-col justify-start items-center gap-7 overflow-hidden bg-white"
       ref={ref}
     >
-      <IconWarning className=" w-20 text-primary" />
-      <div className="self-stretch text-center justify-start text-black text-3xl font-bold font-['Inter']">
-        Show QR to Cashier
-      </div>
+      {!["unpaid", "cancel"].includes(data.status) ? (
+        <>
+          <IconSuccess className=" w-20 text-success" />
+          <div className="self-stretch text-center justify-start text-black text-3xl font-bold font-['Inter']">
+            Payment Successfull
+          </div>
+        </>
+      ) : (
+        <>
+          <IconWarning className=" w-20 text-primary" />
+          <div className="self-stretch text-center justify-start text-black text-3xl font-bold font-['Inter']">
+            Show QR to Cashier
+          </div>
+        </>
+      )}
       <QRCodeSVG value={data.id} className="w-50 h-50 my-2" />
       <div className="self-stretch flex flex-col justify-start items-start gap-5">
         <div className=" self-stretch flex flex-col justify-start items-start gap-2">
@@ -137,6 +148,23 @@ export default function TransactionHome({
             </div>
             <div className="justify-start text-black text-base font-normal font-['Inter']">
               {formatRupiah(Number(data.nominal))}
+            </div>
+          </div>
+          <div className="self-stretch inline-flex justify-between items-center">
+            <div className="justify-start text-black text-base font-normal font-['Inter']">
+              Cash Received
+            </div>
+
+            <div className="justify-start text-black text-base font-normal font-['Inter']">
+              {formatRupiah(Number(data?.cash_received))}
+            </div>
+          </div>
+          <div className="self-stretch inline-flex justify-between items-center">
+            <div className="justify-start text-black text-base font-normal font-['Inter']">
+              Cash Change
+            </div>
+            <div className="justify-start text-red-400 text-base font-normal font-['Inter']">
+              -{formatRupiah(Number(data?.change_amount))}
             </div>
           </div>
         </div>
@@ -229,7 +257,7 @@ export default function TransactionHome({
       </div>
       {!hideButton && (
         <div
-          className="self-stretch px-5 py-2.5 bg-primary rounded-full gap-3 flex justify-center items-center"
+          className="self-stretch px-5 py-2.5 bg-primary rounded-full gap-3 flex justify-center items-center cursor-pointer"
           onClick={handleDownload}
         >
           <IconSave className=" w-4" />

@@ -11,7 +11,7 @@ export async function GET(
 
   const data = await prisma.cafepos_transaction.findUnique({
     where: { id },
-    select: { id: true, nominal: true },
+    select: { id: true, nominal: true, status: true },
   });
 
   return NextResponse.json({ data });

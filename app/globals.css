@@ -5,6 +5,7 @@
 
 @theme {
   --color-primary: #ffcb3f;
+  --color-success: #04c37e;
   --color-disable: #f5f5f5;
   --color-mywarning: oklch(70.4% 0.191 22.216);
 }

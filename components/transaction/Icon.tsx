@@ -19,7 +19,7 @@ export function IconSuccess({ ...rest }: React.HTMLAttributes<SVGElement>) {
   return (
     <svg
       viewBox="0 0 90 89"
-      fill="currentColor"
+      fill="#04C37E"
       xmlns="http://www.w3.org/2000/svg"
       {...rest}
     >
