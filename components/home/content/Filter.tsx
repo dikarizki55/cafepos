@@ -40,6 +40,8 @@ export type dataMenuType = {
 export type serializedData = dataMenuType[];
 
 type FilterContextType = {
+  search: string;
+  setSearch: Dispatch<SetStateAction<string>>;
   dataMenu: serializedData;
   setDataMenu: Dispatch<SetStateAction<serializedData>>;
   rawDataMenu: serializedData;
@@ -49,12 +51,20 @@ type FilterContextType = {
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export function FilterProvider({ children }: { children: ReactNode }) {
+  const [search, setSearch] = useState("");
   const [dataMenu, setDataMenu] = useState<serializedData>([]);
   const [rawDataMenu, setRawDataMenu] = useState<serializedData>([]);
 
   return (
     <FilterContext.Provider
-      value={{ dataMenu, setDataMenu, rawDataMenu, setRawDataMenu }}
+      value={{
+        dataMenu,
+        setDataMenu,
+        rawDataMenu,
+        setRawDataMenu,
+        search,
+        setSearch,
+      }}
     >
       {children}
     </FilterContext.Provider>
@@ -73,10 +83,10 @@ export function useFilter() {
 
 export default function Filter() {
   const [filterCol, setFilterCol] = useState("");
-  // const [rawData, setRawData] = useState<serializedData>([]);
   const [disticnt, setDistinct] = useState<string[]>([]);
 
-  const { setDataMenu, rawDataMenu, setRawDataMenu } = useFilter();
+  const { setDataMenu, rawDataMenu, setRawDataMenu, search, setSearch } =
+    useFilter();
 
   useEffect(() => {
     const getDistinct = async () => {
@@ -121,6 +131,19 @@ export default function Filter() {
       setDataMenu(rawDataMenu);
     }
   }, [filterCol, rawDataMenu, setDataMenu]);
+
+  useEffect(() => {}, []);
+
+  useEffect(() => {
+    if (search !== "") {
+      setFilterCol("");
+      const searchData = rawDataMenu.filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+      );
+
+      setDataMenu(searchData);
+    }
+  }, [rawDataMenu, search, setDataMenu]);
 
   return (
     <div className="flex items-center gap-2 overflow-scroll">

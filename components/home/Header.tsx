@@ -1,9 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { IconSearch } from "./Icon";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
+import Search from "./header/Search";
 
 export default function Header() {
   const searchParams = useSearchParams();
@@ -32,11 +32,11 @@ export default function Header() {
 
   return (
     <div className=" flex flex-col items-center">
-      <div className=" mt-4 w-96 h-12 px-5 py-px inline-flex justify-between items-center overflow-hidden">
+      <div className=" mt-4 w-full h-12 px-7 py-px inline-flex justify-between items-center overflow-hidden">
         <div className="justify-start text-black text-xl font-bold ">
           DikaResto
         </div>
-        <IconSearch className=" w-5" />
+        <Search />
       </div>
 
       <div className="w-full px-7 inline-flex justify-between items-center mt-4">
@@ -49,7 +49,7 @@ export default function Header() {
           )}
         {table && (
           <>
-            <div className="w-52 inline-flex flex-col justify-start items-start gap-[3px]">
+            <div className="w-full inline-flex flex-col justify-start items-start gap-[3px]">
               <div className="self-stretch justify-start text-black text-xl font-normal ">
                 What would you like
               </div>
@@ -57,7 +57,7 @@ export default function Header() {
                 to eat?
               </div>
             </div>
-            <div className="w-14 h-14 bg-primary rounded-xl flex flex-col justify-center items-center">
+            <div className="flex-none w-14 h-14 bg-primary rounded-xl flex flex-col justify-center items-center">
               <div className="justify-start text-black text-xs font-normal ">
                 Table
               </div>
