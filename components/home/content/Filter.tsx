@@ -85,8 +85,7 @@ export default function Filter() {
   const [filterCol, setFilterCol] = useState("");
   const [disticnt, setDistinct] = useState<string[]>([]);
 
-  const { setDataMenu, rawDataMenu, setRawDataMenu, search, setSearch } =
-    useFilter();
+  const { setDataMenu, rawDataMenu, setRawDataMenu, search } = useFilter();
 
   useEffect(() => {
     const getDistinct = async () => {
@@ -142,6 +141,8 @@ export default function Filter() {
       );
 
       setDataMenu(searchData);
+    } else {
+      setDataMenu(rawDataMenu);
     }
   }, [rawDataMenu, search, setDataMenu]);
 
