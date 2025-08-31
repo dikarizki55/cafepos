@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import OrderCard, { OrderCardType } from "./OrderCard";
+import { HTMLMotionProps, motion } from "motion/react";
 
 export type LineType = {
   refresh: boolean;
@@ -65,28 +66,39 @@ export function Line({
   className,
   status,
   wrap = false,
+  ...rest
 }: {
   className?: string;
   status: keyof typeof lineDefine;
   wrap?: boolean;
-}) {
+} & Omit<HTMLMotionProps<"div">, "ref">) {
   const { refresh } = useLine();
   const [transaction, setTransaction] = useState<OrderCardType[]>();
+  const [isFetch, setIsFetch] = useState(false);
   useEffect(() => {
+    setIsFetch(false);
     async function getData() {
       const res = await fetch(lineDefine[status].url, {
         credentials: "include",
       }).then((res) => res.json());
 
       setTransaction(res.data);
+      setIsFetch(true);
     }
 
     getData();
   }, [status, refresh]);
 
+  if (!isFetch) return;
+
   return (
-    <div
+    <motion.div
+      initial={{ y: "100vh", opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: "100vh", opacity: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={`self-stretch flex flex-col justify-start items-start gap-2.5 ${className}`}
+      {...rest}
     >
       <div className="self-stretch justify-start text-black text-2xl font-normal">
         {lineDefine[status].name}
@@ -102,6 +114,6 @@ export function Line({
             <OrderCard key={i} status={status} data={item} />
           ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -3,6 +3,7 @@ import { Line } from "./orderline/Line";
 import NewOrder, { useNewOrder } from "./orderline/NewOrder";
 import { useState } from "react";
 import { StatusType } from "./orderline/OrderCard";
+import { AnimatePresence } from "motion/react";
 
 export default function OrderLine() {
   const { newOrder } = useNewOrder();
@@ -17,6 +18,8 @@ export default function OrderLine() {
     "done",
     "cancel",
   ];
+
+  const filterDefault: StatusType[] = ["ready", "process", "paid", "unpaid"];
 
   return (
     <div
@@ -45,16 +48,15 @@ export default function OrderLine() {
             <IconSearch className=" w-5" />
           </div>
 
-          {filter === "default" && (
-            <>
-              <Line status="ready" />
-              <Line status="process" />
-              <Line status="paid" />
-              <Line status="unpaid" />
-            </>
-          )}
-
-          {filter !== "default" && <Line status={filter} wrap />}
+          <AnimatePresence mode="wait">
+            {filter === "default" &&
+              filterDefault.map((item) => {
+                return <Line key={item} status={item} />;
+              })}
+            {filter !== "default" && (
+              <Line key={`filter${filter}`} status={filter} wrap />
+            )}
+          </AnimatePresence>
         </>
       )}
 
