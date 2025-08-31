@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { IconSearch } from "../Icon";
+import { IconSearch, IconX } from "../Icon";
 import { useFilter } from "../content/Filter";
 
 export default function Search() {
@@ -17,10 +17,13 @@ export default function Search() {
 
   useEffect(() => {
     if (!animate) {
-      const handler = setTimeout(() => setOpen(false), 500);
+      const handler = setTimeout(() => {
+        setOpen(false);
+      }, 500);
+      setSearch("");
       return () => clearTimeout(handler);
     }
-  }, [animate]);
+  }, [animate, setSearch]);
 
   useEffect(() => {
     function handleClickOutside(e: Event) {
@@ -48,27 +51,30 @@ export default function Search() {
       ref={ref}
     >
       {open && (
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search"
-          className={`${animate ? "w-30" : "w-0"} transition-all duration-300`}
-        ></input>
-      )}
-      <IconSearch className=" w-5" onClick={() => setOpen(true)} />
-
-      {/* {open &&
-        createPortal(
+        <>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search"
+            className={`${
+              animate ? "w-30" : "w-0"
+            } transition-all duration-300`}
+          ></input>
           <div
-            className={`fixed top-0 ${
-              animate ? "left-0" : "left-[100vw]"
-            } w-full h-screen transition-all duration-300 bg-white`}
+            className={`${
+              search !== "" ? " w-4 opacity-100" : "w-0 opacity-0"
+            } leading-0 text-black/50 h-3 flex items-center transition-all duration-300`}
+            onClick={() => {
+              setAnimate(false);
+            }}
           >
-            <div onClick={() => setAnimate(false)}>close</div>
-          </div>,
-          document.body
-        )} */}
+            <IconX className=" w-2.5" />
+          </div>
+        </>
+      )}
+
+      <IconSearch className=" w-5" onClick={() => setOpen(true)} />
     </div>
   );
 }
