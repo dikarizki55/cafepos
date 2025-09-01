@@ -1,5 +1,5 @@
 "use client";
-import { IconSave, IconSuccess, IconWarning } from "./Icon";
+import { IconSave } from "./Icon";
 import { QRCodeSVG } from "qrcode.react";
 import Image from "next/image";
 import { Prisma } from "@prisma/client";
@@ -7,6 +7,7 @@ import { formatDate, formatRupiah } from "@/lib/formatRupiah";
 import { useEffect, useRef, useState } from "react";
 import * as htmlToImage from "html-to-image";
 import { useRouter } from "next/navigation";
+import StatusAnimation from "./StatusAnimation";
 
 export default function TransactionHome({
   data,
@@ -89,10 +90,18 @@ export default function TransactionHome({
 
   return (
     <div
-      className=" w-100 px-10 py-15 flex flex-col justify-start items-center gap-7 overflow-hidden bg-white"
+      className=" max-w-110 px-10 py-15 flex flex-col justify-start items-center gap-7 overflow-hidden bg-white"
       ref={ref}
     >
-      {!["unpaid", "cancel"].includes(data.status) ? (
+      <div className="self-stretch text-center flex items-center flex-col gap-2 text-3xl font-bold">
+        {data.status !== "cancel" && <StatusAnimation status={data.status} />}
+        {data.status === "unpaid" && "Show QR to Cashier"}
+        {data.status === "paid" && "Payment Successfull"}
+        {data.status === "process" && "On Cooking..."}
+        {data.status === "ready" && "On the Way to Your Table..."}
+        {data.status === "done" && "Enjoy your food"}
+      </div>
+      {/* {!["unpaid", "cancel"].includes(data.status) ? (
         <>
           <IconSuccess className=" w-20 text-success" />
           <div className="self-stretch text-center justify-start text-black text-3xl font-bold font-['Inter']">
@@ -109,7 +118,7 @@ export default function TransactionHome({
             Show QR to Cashier
           </div>
         </>
-      )}
+      )} */}
       <QRCodeSVG
         value={`${window.location.origin}/transaction/${data.id}`}
         className="w-50 h-50 my-2"
