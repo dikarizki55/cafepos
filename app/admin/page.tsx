@@ -27,6 +27,23 @@ export default function Admin() {
     }
   };
 
+  async function handleTestAccount(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      await signIn("credentials", {
+        username: "admin",
+        password: "admin",
+        redirect: false,
+      });
+    } catch (error) {
+      setIsLoading(false);
+      console.log(error);
+    } finally {
+      router.push("/admin/dashboard");
+    }
+  }
+
   if (isLoading)
     return (
       <div className=" w-full h-screen flex justify-center items-center">
@@ -58,6 +75,13 @@ export default function Admin() {
             className=" bg-primary px-6 py-3 mt-4 rounded-full cursor-pointer"
           >
             Login
+          </button>
+          <button
+            type="button"
+            className=" bg-primary px-6 py-3 mt-4 rounded-full cursor-pointer"
+            onClick={handleTestAccount}
+          >
+            Test Account
           </button>
         </form>
       </div>
